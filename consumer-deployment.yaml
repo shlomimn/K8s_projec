@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata: 
+  name: consumer
+  namespace: rabbitmq-ns
+spec: 
+  selector: 
+    matchLabels:
+      app:  consumer
+  replicas: 1
+  template: 
+    metadata:
+      labels:
+        app:  consumer
+    spec:
+      containers:
+      - name: consumer-container
+        image:  shlomimn/rabbitmq_consumer:latest
+        command: ["python"]
+        args: ["/app/consumer.py","-p","5672","-s","rabbitmq-svc"]
+      imagePullSecrets:      
+      - name: githubcreds

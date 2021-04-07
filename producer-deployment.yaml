@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata: 
+  name: producer
+  namespace: rabbitmq-ns
+spec: 
+  selector: 
+    matchLabels:
+      app:  producer
+  replicas: 1
+  template: 
+    metadata:
+      labels:
+        app:  producer
+    spec:
+      containers:
+      - name: producer-container
+        image:  shlomimn/rabbitmq_producer:latest
+        command: ["python"]
+        args: ["/app/producer.py","-p","5672","-s","rabbitmq-svc","-m","LALALALALALAL!!!!","-r","30"]
+      imagePullSecrets:      
+      - name: githubcreds
