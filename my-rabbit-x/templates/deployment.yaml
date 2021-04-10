@@ -1,17 +1,16 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "my-rabbitmq.fullname" . }}
-  namespace: {{ printf "rabbitmq-nx" }}
+  name: {{ include "rabbit-x.fullname" . }}
   labels:
-    {{- include "my-rabbitmq.labels" . | nindent 4 }}
+    {{- include "rabbit-x.labels" . | nindent 4 }}
 spec:
   {{- if not .Values.autoscaling.enabled }}
   replicas: {{ .Values.replicaCount }}
   {{- end }}
   selector:
     matchLabels:
-      {{- include "my-rabbitmq.selectorLabels" . | nindent 6 }}
+      {{- include "rabbit-x.selectorLabels" . | nindent 6 }}
   template:
     metadata:
       {{- with .Values.podAnnotations }}
@@ -19,13 +18,13 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       labels:
-        {{- include "my-rabbitmq.selectorLabels" . | nindent 8 }}
+        {{- include "rabbit-x.selectorLabels" . | nindent 8 }}
     spec:
       {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      serviceAccountName: {{ include "my-rabbitmq.serviceAccountName" . }}
+      serviceAccountName: {{ include "rabbit-x.serviceAccountName" . }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
       containers:
@@ -35,23 +34,25 @@ spec:
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
-            - name: rabbitmqMainPort
-              containerPort: {{ .Values.service.rabbitmqMainPort }}
+            - name: amqp
+              containerPort: {{ .Values.service.port1 }}
               protocol: TCP
-            - name: rabbitmqGUIPort
-              containerPort: {{ .Values.service.rabbitmqGUIPort }}
+            - name: mgmt-ui
+              containerPort: {{ .Values.service.port2 }}
               protocol: TCP
-            - name: rabbitmqEPMDPort
-              containerPort: {{ .Values.service.rabbitmqEPMDPort }}
+            - name: epmd
+              containerPort: {{ .Values.service.port3 }}
               protocol: TCP
           livenessProbe:
             httpGet:
               path: /
-              port: http
+              port: mgmt-ui
+            initialDelaySeconds: 5
           readinessProbe:
             httpGet:
               path: /
-              port: http
+              port: mgmt-ui
+            initialDelaySeconds: 15
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
       {{- with .Values.nodeSelector }}

@@ -2,14 +2,14 @@
 apiVersion: autoscaling/v2beta1
 kind: HorizontalPodAutoscaler
 metadata:
-  name: {{ include "my-rabbitmq.fullname" . }}
+  name: {{ include "rabbit-x.fullname" . }}
   labels:
-    {{- include "my-rabbitmq.labels" . | nindent 4 }}
+    {{- include "rabbit-x.labels" . | nindent 4 }}
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
-    name: {{ include "my-rabbitmq.fullname" . }}
+    name: {{ include "rabbit-x.fullname" . }}
   minReplicas: {{ .Values.autoscaling.minReplicas }}
   maxReplicas: {{ .Values.autoscaling.maxReplicas }}
   metrics:
